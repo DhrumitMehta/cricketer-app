@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, ActivityIndicator, StatusBar, Alert, RefreshControl } from 'react-native';
 import { Button, Text, Card, FAB, Portal, Dialog, TextInput, IconButton, Switch } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -60,6 +60,7 @@ interface Match {
 
 export default function Matches() {
   const navigation = useNavigation<NavigationProp>();
+  const route = useNavigationState(state => state?.routes[state.index]);
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState<Match[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -590,6 +591,14 @@ export default function Matches() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="white" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Matches</Text>
+        <IconButton
+          icon="account"
+          size={24}
+          onPress={() => navigation.navigate('PlayerProfile')}
+        />
+      </View>
       <ScrollView 
         style={styles.scrollView}
         refreshControl={
@@ -854,5 +863,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 }); 

@@ -177,6 +177,14 @@ export default function TrainingTracker() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="white" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Training</Text>
+        <IconButton
+          icon="account"
+          size={24}
+          onPress={() => navigation.navigate('PlayerProfile')}
+        />
+      </View>
       <View style={styles.filtersContainer}>
         <View style={styles.filterRow}>
           <View style={styles.filterButtonContainer}>
@@ -389,6 +397,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   filtersContainer: {
     padding: 16,
