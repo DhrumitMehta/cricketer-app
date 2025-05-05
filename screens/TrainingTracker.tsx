@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, Alert, RefreshControl } from 'react-native';
-import { Button, Text, FAB, Divider, IconButton } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, Alert, RefreshControl, ActivityIndicator, StatusBar } from 'react-native';
+import { Button, Text, FAB, Divider, IconButton, Card, Portal, Dialog, TextInput } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TrainingTracker'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 interface TrainingSession {
   id: string;
@@ -41,6 +43,7 @@ export default function TrainingTracker() {
     focus_area: '',
     duration: '',
   });
+  const [loading, setLoading] = useState(true);
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -88,6 +91,7 @@ export default function TrainingTracker() {
     }
 
     setSessions(data || []);
+    setLoading(false);
   };
 
   const getMonthYearOptions = () => {
@@ -162,8 +166,17 @@ export default function TrainingTracker() {
     navigation.navigate('AddTrainingSession', { session });
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       <View style={styles.filtersContainer}>
         <View style={styles.filterRow}>
           <View style={styles.filterButtonContainer}>
@@ -340,7 +353,7 @@ export default function TrainingTracker() {
         }
       >
         {sessions.map((session) => (
-          <View key={session.id} style={styles.sessionCard}>
+          <Card key={session.id} style={styles.sessionCard}>
             <View style={styles.sessionHeader}>
               <Text style={styles.sessionDate}>{session.date}</Text>
               <View style={styles.sessionActions}>
@@ -359,7 +372,7 @@ export default function TrainingTracker() {
             <Text>Duration: {session.duration} minutes</Text>
             <Text>Focus: {session.focus_area}</Text>
             <Text>Notes: {session.notes}</Text>
-          </View>
+          </Card>
         ))}
       </ScrollView>
 
@@ -368,7 +381,7 @@ export default function TrainingTracker() {
         icon="plus"
         onPress={() => navigation.navigate('AddTrainingSession', {})}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -465,6 +478,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sortButton: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  scrollView: {
     flex: 1,
   },
 }); 

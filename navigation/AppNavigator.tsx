@@ -7,12 +7,14 @@ import AddTrainingSession from '../screens/AddTrainingSession';
 import PlayerProfile from '../screens/PlayerProfile';
 import Login from '../screens/Login';
 import SignUp from '../screens/SignUp';
+import Matches from '../screens/Matches';
+import BottomTabNavigator from './BottomTabNavigator';
 import { supabase } from '../lib/supabase';
 
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  TrainingTracker: undefined;
+  Main: undefined;
   AddTrainingSession: { session?: any };
   PlayerProfile: undefined;
 };
@@ -59,17 +61,10 @@ export default function AppNavigator() {
         ) : (
           <>
             <Stack.Screen 
-              name="TrainingTracker" 
-              component={TrainingTracker}
+              name="Main" 
+              component={BottomTabNavigator}
               options={({ navigation }) => ({
-                title: 'Training Tracker',
-                headerRight: () => (
-                  <IconButton
-                    icon="account"
-                    size={24}
-                    onPress={() => navigation.navigate('PlayerProfile')}
-                  />
-                ),
+                headerShown: false,
               })}
             />
             <Stack.Screen 
