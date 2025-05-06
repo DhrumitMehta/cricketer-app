@@ -1,0 +1,17 @@
+{
+  "name": "cricketer-app-import",
+  "version": "1.0.0",
+  "description": "Script to import match data from Excel to Supabase",
+  "main": "import_matches.js",
+  "scripts": {
+    "import": "node import_matches.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.5.0",
+    "xlsx": "^0.18.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

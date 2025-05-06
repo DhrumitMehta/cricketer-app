@@ -15,6 +15,7 @@ interface Match {
   date: string;
   opponent: string;
   venue: string;
+  competition?: string;
   result: string;
   match_format: 'T20' | 'ODI' | 'T10' | 'Other';
   other_format?: string;
@@ -22,10 +23,17 @@ interface Match {
     position: number;
     runs: number;
     balls: number;
+    singles: number;
+    doubles: number;
+    triples: number;
     fours: number;
     sixes: number;
     dots: number;
     not_out: boolean;
+    how_out?: 'Bowled' | 'LBW' | 'Stumped' | 'C&B' | 'Caught Behind' | 'Caught' | 'Run Out' | 'Hit Wicket';
+    shot_out?: string;
+    error_type?: 'Mental' | 'Execution';
+    bowler_type?: 'LAO' | 'RAOS' | 'RAWS' | 'LAWS' | 'LAP' | 'RAP';
   };
   bowling: {
     position: number;
@@ -46,7 +54,8 @@ interface Match {
     player_of_match: boolean;
   };
   source: 'manual' | 'cricclubs';
-  notes?: string;
+  batting_notes?: string;
+  bowling_notes?: string;
   dot_percentage: number;
   strike_rate: number;
   boundary_percentage: number;
@@ -69,12 +78,30 @@ export default function Matches() {
   const [newMatch, setNewMatch] = useState<Partial<Match>>({
     date: new Date().toISOString().split('T')[0],
     match_format: 'T20',
-    batting: { position: 0, runs: 0, balls: 0, fours: 0, sixes: 0, dots: 0, not_out: false },
+    batting: { 
+      position: 0, 
+      runs: 0, 
+      balls: 0, 
+      singles: 0,
+      doubles: 0,
+      triples: 0,
+      fours: 0, 
+      sixes: 0, 
+      dots: 0, 
+      not_out: false,
+      how_out: undefined,
+      shot_out: undefined,
+      error_type: undefined,
+      bowler_type: undefined
+    },
     bowling: { position: 0, balls: 0, runs: 0, maidens: 0, wickets: 0, dots: 0, fours: 0, sixes: 0 },
     fielding: { infield_catches: 0, boundary_catches: 0, direct_runouts: 0, indirect_runouts: 0, drops: 0, player_of_match: false },
     source: 'manual',
     bowling_wides: 0,
-    bowling_noballs: 0
+    bowling_noballs: 0,
+    batting_notes: '',
+    bowling_notes: '',
+    competition: ''
   });
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
 
@@ -147,12 +174,14 @@ export default function Matches() {
       date: match.date,
       opponent: match.opponent,
       venue: match.venue,
+      competition: match.competition,
       result: match.result,
       batting: match.batting,
       bowling: match.bowling,
       fielding: match.fielding,
       source: match.source,
-      notes: match.notes,
+      batting_notes: match.batting_notes,
+      bowling_notes: match.bowling_notes,
     });
     setShowAddDialog(true);
   };
@@ -199,12 +228,30 @@ export default function Matches() {
       setNewMatch({
         date: new Date().toISOString().split('T')[0],
         match_format: 'T20',
-        batting: { position: 0, runs: 0, balls: 0, fours: 0, sixes: 0, dots: 0, not_out: false },
+        batting: { 
+          position: 0, 
+          runs: 0, 
+          balls: 0, 
+          singles: 0,
+          doubles: 0,
+          triples: 0,
+          fours: 0, 
+          sixes: 0, 
+          dots: 0, 
+          not_out: false,
+          how_out: undefined,
+          shot_out: undefined,
+          error_type: undefined,
+          bowler_type: undefined
+        },
         bowling: { position: 0, balls: 0, runs: 0, maidens: 0, wickets: 0, dots: 0, fours: 0, sixes: 0 },
         fielding: { infield_catches: 0, boundary_catches: 0, direct_runouts: 0, indirect_runouts: 0, drops: 0, player_of_match: false },
         source: 'manual',
         bowling_wides: 0,
-        bowling_noballs: 0
+        bowling_noballs: 0,
+        batting_notes: '',
+        bowling_notes: '',
+        competition: ''
       });
       fetchMatches();
     } catch (error) {
@@ -241,12 +288,30 @@ export default function Matches() {
         setNewMatch({
           date: new Date().toISOString().split('T')[0],
           match_format: 'T20',
-          batting: { position: 0, runs: 0, balls: 0, fours: 0, sixes: 0, dots: 0, not_out: false },
+          batting: { 
+            position: 0, 
+            runs: 0, 
+            balls: 0, 
+            singles: 0,
+            doubles: 0,
+            triples: 0,
+            fours: 0, 
+            sixes: 0, 
+            dots: 0, 
+            not_out: false,
+            how_out: undefined,
+            shot_out: undefined,
+            error_type: undefined,
+            bowler_type: undefined
+          },
           bowling: { position: 0, balls: 0, runs: 0, maidens: 0, wickets: 0, dots: 0, fours: 0, sixes: 0 },
           fielding: { infield_catches: 0, boundary_catches: 0, direct_runouts: 0, indirect_runouts: 0, drops: 0, player_of_match: false },
           source: 'manual',
           bowling_wides: 0,
-          bowling_noballs: 0
+          bowling_noballs: 0,
+          batting_notes: '',
+          bowling_notes: '',
+          competition: ''
         });
       }}
       style={styles.dialog}
@@ -315,6 +380,12 @@ export default function Matches() {
             style={styles.input}
           />
           <TextInput
+            label="Competition"
+            value={newMatch.competition}
+            onChangeText={(text) => setNewMatch({ ...newMatch, competition: text })}
+            style={styles.input}
+          />
+          <TextInput
             label="Result"
             value={newMatch.result}
             onChangeText={(text) => setNewMatch({ ...newMatch, result: text })}
@@ -352,26 +423,64 @@ export default function Matches() {
             keyboardType="numeric"
             style={styles.input}
           />
-          <TextInput
-            label="4s"
-            value={newMatch.batting?.fours.toString()}
-            onChangeText={(text) => setNewMatch({
-              ...newMatch,
-              batting: { ...newMatch.batting!, fours: parseInt(text) || 0 }
-            })}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <TextInput
-            label="6s"
-            value={newMatch.batting?.sixes.toString()}
-            onChangeText={(text) => setNewMatch({
-              ...newMatch,
-              batting: { ...newMatch.batting!, sixes: parseInt(text) || 0 }
-            })}
-            keyboardType="numeric"
-            style={styles.input}
-          />
+
+          <Text style={styles.subSectionTitle}>Run Types</Text>
+          <View style={styles.runTypesContainer}>
+            <TextInput
+              label="Singles"
+              value={newMatch.batting?.singles?.toString()}
+              onChangeText={(text) => setNewMatch({
+                ...newMatch,
+                batting: { ...newMatch.batting!, singles: parseInt(text) || 0 }
+              })}
+              keyboardType="numeric"
+              style={styles.runTypeInput}
+            />
+            <TextInput
+              label="Doubles"
+              value={newMatch.batting?.doubles?.toString()}
+              onChangeText={(text) => setNewMatch({
+                ...newMatch,
+                batting: { ...newMatch.batting!, doubles: parseInt(text) || 0 }
+              })}
+              keyboardType="numeric"
+              style={styles.runTypeInput}
+            />
+            <TextInput
+              label="Triples"
+              value={newMatch.batting?.triples?.toString()}
+              onChangeText={(text) => setNewMatch({
+                ...newMatch,
+                batting: { ...newMatch.batting!, triples: parseInt(text) || 0 }
+              })}
+              keyboardType="numeric"
+              style={styles.runTypeInput}
+            />
+          </View>
+
+          <Text style={styles.subSectionTitle}>Boundaries</Text>
+          <View style={styles.runTypesContainer}>
+            <TextInput
+              label="Fours (4s)"
+              value={newMatch.batting?.fours.toString()}
+              onChangeText={(text) => setNewMatch({
+                ...newMatch,
+                batting: { ...newMatch.batting!, fours: parseInt(text) || 0 }
+              })}
+              keyboardType="numeric"
+              style={styles.runTypeInput}
+            />
+            <TextInput
+              label="Sixes (6s)"
+              value={newMatch.batting?.sixes.toString()}
+              onChangeText={(text) => setNewMatch({
+                ...newMatch,
+                batting: { ...newMatch.batting!, sixes: parseInt(text) || 0 }
+              })}
+              keyboardType="numeric"
+              style={styles.runTypeInput}
+            />
+          </View>
           <TextInput
             label="Dots"
             value={newMatch.batting?.dots.toString()}
@@ -392,6 +501,78 @@ export default function Matches() {
               })}
             />
           </View>
+
+          {!newMatch.batting?.not_out && (
+            <>
+              <Text style={styles.sectionTitle}>Dismissal Details</Text>
+              <View style={styles.formatContainer}>
+                <Text style={styles.formatLabel}>How Out:</Text>
+                <View style={styles.formatButtons}>
+                  {['Bowled', 'LBW', 'Stumped', 'C&B', 'Caught Behind', 'Caught', 'Run Out', 'Hit Wicket'].map((outType) => (
+                    <Button
+                      key={outType}
+                      mode={newMatch.batting?.how_out === outType ? 'contained' : 'outlined'}
+                      onPress={() => setNewMatch({
+                        ...newMatch,
+                        batting: { ...newMatch.batting!, how_out: outType as Match['batting']['how_out'] }
+                      })}
+                      style={styles.formatButton}
+                    >
+                      {outType}
+                    </Button>
+                  ))}
+                </View>
+              </View>
+
+              <TextInput
+                label="Shot Out"
+                value={newMatch.batting?.shot_out}
+                onChangeText={(text) => setNewMatch({
+                  ...newMatch,
+                  batting: { ...newMatch.batting!, shot_out: text }
+                })}
+                style={styles.input}
+              />
+
+              <View style={styles.formatContainer}>
+                <Text style={styles.formatLabel}>Error Type:</Text>
+                <View style={styles.formatButtons}>
+                  {['Mental', 'Execution'].map((errorType) => (
+                    <Button
+                      key={errorType}
+                      mode={newMatch.batting?.error_type === errorType ? 'contained' : 'outlined'}
+                      onPress={() => setNewMatch({
+                        ...newMatch,
+                        batting: { ...newMatch.batting!, error_type: errorType as Match['batting']['error_type'] }
+                      })}
+                      style={styles.formatButton}
+                    >
+                      {errorType}
+                    </Button>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formatContainer}>
+                <Text style={styles.formatLabel}>Bowler Type:</Text>
+                <View style={styles.formatButtons}>
+                  {['LAO', 'RAOS', 'RAWS', 'LAWS', 'LAP', 'RAP'].map((bowlerType) => (
+                    <Button
+                      key={bowlerType}
+                      mode={newMatch.batting?.bowler_type === bowlerType ? 'contained' : 'outlined'}
+                      onPress={() => setNewMatch({
+                        ...newMatch,
+                        batting: { ...newMatch.batting!, bowler_type: bowlerType as Match['batting']['bowler_type'] }
+                      })}
+                      style={styles.formatButton}
+                    >
+                      {bowlerType}
+                    </Button>
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
 
           <Text style={styles.sectionTitle}>Bowling</Text>
           <TextInput
@@ -560,9 +741,16 @@ export default function Matches() {
           />
 
           <TextInput
-            label="Notes"
-            value={newMatch.notes}
-            onChangeText={(text) => setNewMatch({ ...newMatch, notes: text })}
+            label="Batting Notes"
+            value={newMatch.batting_notes}
+            onChangeText={(text) => setNewMatch({ ...newMatch, batting_notes: text })}
+            multiline
+            style={styles.input}
+          />
+          <TextInput
+            label="Bowling Notes"
+            value={newMatch.bowling_notes}
+            onChangeText={(text) => setNewMatch({ ...newMatch, bowling_notes: text })}
             multiline
             style={styles.input}
           />
@@ -575,12 +763,30 @@ export default function Matches() {
           setNewMatch({
             date: new Date().toISOString().split('T')[0],
             match_format: 'T20',
-            batting: { position: 0, runs: 0, balls: 0, fours: 0, sixes: 0, dots: 0, not_out: false },
+            batting: { 
+              position: 0, 
+              runs: 0, 
+              balls: 0, 
+              singles: 0,
+              doubles: 0,
+              triples: 0,
+              fours: 0, 
+              sixes: 0, 
+              dots: 0, 
+              not_out: false,
+              how_out: undefined,
+              shot_out: undefined,
+              error_type: undefined,
+              bowler_type: undefined
+            },
             bowling: { position: 0, balls: 0, runs: 0, maidens: 0, wickets: 0, dots: 0, fours: 0, sixes: 0 },
             fielding: { infield_catches: 0, boundary_catches: 0, direct_runouts: 0, indirect_runouts: 0, drops: 0, player_of_match: false },
             source: 'manual',
             bowling_wides: 0,
-            bowling_noballs: 0
+            bowling_noballs: 0,
+            batting_notes: '',
+            bowling_notes: '',
+            competition: ''
           });
         }}>Cancel</Button>
         <Button onPress={handleAddMatch}>{editingMatch ? 'Save' : 'Add'}</Button>
@@ -628,17 +834,32 @@ export default function Matches() {
                   />
                 </View>
               </View>
-              <Text style={styles.opponent}>vs {match.opponent}</Text>
-              <Text style={styles.venue}>{match.venue}</Text>
-              <Text style={styles.format}>{match.match_format === 'Other' ? match.other_format : match.match_format}</Text>
+              <Text style={styles.matchDetails}>
+                {match.match_format === 'Other' ? match.other_format : match.match_format} at {match.venue} vs <Text style={styles.opponentName}>{match.opponent}</Text>
+                {match.competition && ` - ${match.competition}`}
+              </Text>
               <Text style={styles.result}>{match.result}</Text>
               
               <View style={styles.statsContainer}>
                 <View style={styles.statSection}>
                   <Text style={styles.statTitle}>Batting</Text>
                   <Text>Runs: {match.batting.runs} ({match.batting.balls})</Text>
+                  <View style={styles.runTypeContainer}>
+                    <Text style={styles.runTypeText}>1s: {match.batting.singles}</Text>
+                    <Text style={styles.runTypeText}>2s: {match.batting.doubles}</Text>
+                    <Text style={styles.runTypeText}>3s: {match.batting.triples}</Text>
+                  </View>
                   <Text>4s: {match.batting.fours} | 6s: {match.batting.sixes}</Text>
-                  {match.batting.not_out && <Text>Not Out</Text>}
+                  {match.batting.not_out ? (
+                    <Text>Not Out</Text>
+                  ) : (
+                    <View style={styles.dismissalDetails}>
+                      <Text>Out: {match.batting.how_out}</Text>
+                      {match.batting.shot_out && <Text>Shot: {match.batting.shot_out}</Text>}
+                      {match.batting.error_type && <Text>Error: {match.batting.error_type}</Text>}
+                      {match.batting.bowler_type && <Text>Bowler: {match.batting.bowler_type}</Text>}
+                    </View>
+                  )}
                   <View style={styles.metricsContainer}>
                     <Text style={styles.metricText}>
                       Dot %: {match.dot_percentage}%
@@ -690,10 +911,16 @@ export default function Matches() {
                 </View>
               )}
 
-              {match.notes && (
+              {match.batting_notes && (
                 <View style={styles.notesContainer}>
-                  <Text style={styles.notesTitle}>Notes</Text>
-                  <Text>{match.notes}</Text>
+                  <Text style={styles.notesTitle}>Batting Notes</Text>
+                  <Text>{match.batting_notes}</Text>
+                </View>
+              )}
+              {match.bowling_notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Bowling Notes</Text>
+                  <Text>{match.bowling_notes}</Text>
                 </View>
               )}
             </Card.Content>
@@ -877,5 +1104,55 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  competition: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    fontStyle: 'italic',
+  },
+  matchDetails: {
+    fontSize: 16,
+    marginVertical: 4,
+    color: '#333',
+  },
+  opponentName: {
+    fontWeight: 'bold',
+  },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
+  subSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+    color: '#333',
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 4,
+  },
+  runTypesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 16,
+  },
+  runTypeInput: {
+    flex: 1,
+    minWidth: 100,
+  },
+  runTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: 4,
+    gap: 8,
+  },
+  runTypeText: {
+    fontSize: 14,
+    color: '#333',
   },
 }); 

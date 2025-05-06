@@ -7,6 +7,8 @@ module.exports = function (api) {
         'module-resolver',
         {
           alias: {
+            '@supabase/supabase-js': '@supabase/supabase-js',
+            '@supabase/postgrest-js': '@supabase/postgrest-js',
             stream: 'stream-browserify',
             crypto: 'crypto-browserify',
             http: 'stream-http',

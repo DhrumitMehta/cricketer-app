@@ -17,8 +17,10 @@ config.resolver.extraNodeModules = {
   url: require.resolve('url/'),
   fs: false,
   tls: false,
+  '@supabase/supabase-js': require.resolve('@supabase/supabase-js'),
+  '@supabase/postgrest-js': require.resolve('@supabase/postgrest-js'),
 };
 
-config.resolver.sourceExts = ['jsx', 'js', 'ts', 'tsx', 'json'];
+config.resolver.sourceExts = ['jsx', 'js', 'ts', 'tsx', 'json', 'mjs', 'cjs'];
 
 module.exports = config; 

@@ -5,6 +5,7 @@ CREATE TABLE matches (
     date DATE NOT NULL,
     opponent TEXT NOT NULL,
     venue TEXT NOT NULL,
+    competition TEXT,
     result TEXT,
     batting JSONB NOT NULL DEFAULT '{
         "position": 0,
@@ -31,7 +32,8 @@ CREATE TABLE matches (
         "player_of_match": false
     }',
     source TEXT NOT NULL CHECK (source IN ('manual', 'cricclubs')),
-    notes TEXT,
+    batting_notes TEXT,
+    bowling_notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
