@@ -272,11 +272,6 @@ export default function Matches() {
     return remainingBalls === 0 ? fullOvers.toString() : `${fullOvers}.${remainingBalls}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-  };
-
   const renderMatchListItem = (match: Match) => (
     <TouchableOpacity
       key={match.id}
@@ -287,7 +282,7 @@ export default function Matches() {
       onPress={() => setSelectedMatch(match)}
     >
       <Text style={styles.matchListDate}>
-        {formatDate(match.date)}
+        {new Date(match.date).toLocaleDateString()}
       </Text>
       <Text style={styles.matchListOpponent} numberOfLines={1}>
         vs {match.opponent}
@@ -302,7 +297,7 @@ export default function Matches() {
     <Card style={styles.detailCard}>
       <Card.Content>
         <View style={styles.matchHeader}>
-          <Text style={styles.date}>{formatDate(match.date)}</Text>
+          <Text style={styles.date}>{new Date(match.date).toLocaleDateString()}</Text>
           <View style={styles.matchActions}>
             <IconButton
               icon="pencil"
@@ -348,37 +343,65 @@ export default function Matches() {
                 <Text style={styles.metricText}>Dot %: {match.dot_percentage}%</Text>
                 <Text style={styles.metricText}>SR: {match.strike_rate}</Text>
                 <Text style={styles.metricText}>Boundary %: {match.boundary_percentage}%</Text>
-                <Text style={styles.metricText}>Balls/Boundary: {match.balls_per_boundary || '-'}</Text>
+            <Text>Runs: {match.batting.runs} ({match.batting.balls})</Text>
+            <View style={styles.runTypeContainer}>
+              <Text style={styles.runTypeText}>1s: {match.batting.singles}</Text>
+              <Text style={styles.runTypeText}>2s: {match.batting.doubles}</Text>
+              <Text style={styles.runTypeText}>3s: {match.batting.triples}</Text>
+            </View>
+            <Text>4s: {match.batting.fours} | 6s: {match.batting.sixes}</Text>
+            {match.batting.not_out ? (
+              <Text>Not Out</Text>
+            ) : (
+              <View style={styles.dismissalDetails}>
+                <Text>Out: {match.batting.how_out}</Text>
+                {match.batting.shot_out && <Text>Shot: {match.batting.shot_out}</Text>}
+                {match.batting.error_type && <Text>Error: {match.batting.error_type}</Text>}
+                {match.batting.bowler_type && <Text>Bowler: {match.batting.bowler_type}</Text>}
               </View>
+            )}
+            <View style={styles.metricsContainer}>
+              <Text style={styles.metricText}>
+                Dot %: {match.dot_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Strike Rate: {match.strike_rate}
+              </Text>
+              <Text style={styles.metricText}>
+                Boundary %: {match.boundary_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Balls/Boundary: {match.balls_per_boundary || '-'}
+              </Text>
             </View>
           </View>
-
-          {/* Bowling Stats */}
+          
           <View style={styles.statSection}>
             <Text style={styles.statTitle}>Bowling</Text>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>
-                {ballsToOvers(match.bowling.balls)}-{match.bowling.maidens}-{match.bowling.runs}-{match.bowling.wickets}
+            <Text style={styles.bowlingStats}>
+              {ballsToOvers(match.bowling.balls)}-{match.bowling.maidens}-{match.bowling.runs}-{match.bowling.wickets}
+            </Text>
+            <Text>Wides: {match.bowling_wides} | No Balls: {match.bowling_noballs}</Text>
+            <View style={styles.metricsContainer}>
+              <Text style={styles.metricText}>
+                Economy: {match.bowling_economy}
               </Text>
-              <Text style={styles.statValue}>Wides: {match.bowling_wides} | No Balls: {match.bowling_noballs}</Text>
-              <View style={styles.metricsContainer}>
-                <Text style={styles.metricText}>Economy: {match.bowling_economy}</Text>
-                <Text style={styles.metricText}>Dot %: {match.bowling_dot_percentage}%</Text>
-                <Text style={styles.metricText}>Balls/Boundary: {match.bowling_balls_per_boundary || '-'}</Text>
-              </View>
+              <Text style={styles.metricText}>
+                Dot %: {match.bowling_dot_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Balls/Boundary: {match.bowling_balls_per_boundary || '-'}
+              </Text>
             </View>
           </View>
 
-          {/* Fielding Stats */}
           <View style={styles.statSection}>
             <Text style={styles.statTitle}>Fielding</Text>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>Infield catches: {match.fielding.infield_catches}</Text>
-              <Text style={styles.statValue}>Bdry catches: {match.fielding.boundary_catches}</Text>
-              <Text style={styles.statValue}>Direct RO: {match.fielding.direct_runouts}</Text>
-              <Text style={styles.statValue}>Indirect RO: {match.fielding.indirect_runouts}</Text>
-              <Text style={styles.statValue}>Drops: {match.fielding.drops}</Text>
-            </View>
+            <Text style={styles.fieldingStat}>Infield catches: {match.fielding.infield_catches}</Text>
+            <Text style={styles.fieldingStat}>Bdry catches: {match.fielding.boundary_catches}</Text>
+            <Text style={styles.fieldingStat}>Direct RO: {match.fielding.direct_runouts}</Text>
+            <Text style={styles.fieldingStat}>Indirect RO: {match.fielding.indirect_runouts}</Text>
+            <Text style={styles.fieldingStat}>Drops: {match.fielding.drops}</Text>
           </View>
         </View>
 
@@ -1069,55 +1092,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   statsContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
     gap: 16,
-    marginTop: 16,
   },
   statSection: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 16,
+    flex: 1,
   },
   statTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
-  },
-  statContent: {
-    gap: 8,
-  },
-  statValue: {
-    fontSize: 14,
-    color: '#444',
-  },
-  metricsContainer: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-  },
-  metricText: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
-  },
-  runTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 12,
-    marginVertical: 8,
-  },
-  runTypeText: {
-    fontSize: 13,
-    color: '#444',
-  },
-  dismissalDetails: {
-    padding: 12,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    gap: 6,
-    marginTop: 8,
+    marginBottom: 6,
   },
   notesContainer: {
     marginTop: 12,
@@ -1179,6 +1165,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  metricsContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
+  metricText: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 2,
+  },
+  bowlingStats: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  fieldingStat: {
+    fontSize: 13,
+    marginBottom: 2,
+    marginLeft: 8,
+  },
   formatContainer: {
     marginBottom: 16,
   },
@@ -1200,6 +1207,12 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
   subSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -1219,6 +1232,16 @@ const styles = StyleSheet.create({
   runTypeInput: {
     flex: 1,
     minWidth: 100,
+  },
+  runTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: 4,
+    gap: 8,
+  },
+  runTypeText: {
+    fontSize: 14,
+    color: '#333',
   },
   date: {
     fontSize: 18,

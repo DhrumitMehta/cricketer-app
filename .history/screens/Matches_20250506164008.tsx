@@ -272,11 +272,6 @@ export default function Matches() {
     return remainingBalls === 0 ? fullOvers.toString() : `${fullOvers}.${remainingBalls}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-  };
-
   const renderMatchListItem = (match: Match) => (
     <TouchableOpacity
       key={match.id}
@@ -287,7 +282,7 @@ export default function Matches() {
       onPress={() => setSelectedMatch(match)}
     >
       <Text style={styles.matchListDate}>
-        {formatDate(match.date)}
+        {new Date(match.date).toLocaleDateString()}
       </Text>
       <Text style={styles.matchListOpponent} numberOfLines={1}>
         vs {match.opponent}
@@ -302,7 +297,7 @@ export default function Matches() {
     <Card style={styles.detailCard}>
       <Card.Content>
         <View style={styles.matchHeader}>
-          <Text style={styles.date}>{formatDate(match.date)}</Text>
+          <Text style={styles.date}>{new Date(match.date).toLocaleDateString()}</Text>
           <View style={styles.matchActions}>
             <IconButton
               icon="pencil"
@@ -1069,55 +1064,55 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   statsContainer: {
-    flexDirection: 'column',
-    gap: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 16,
+    gap: 12,
   },
   statSection: {
+    flex: 1,
     backgroundColor: '#f8f8f8',
     borderRadius: 8,
-    padding: 16,
-  },
-  statTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+    padding: 12,
   },
   statContent: {
     gap: 8,
   },
+  statTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
   statValue: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#444',
   },
   metricsContainer: {
-    marginTop: 12,
-    padding: 12,
+    marginTop: 8,
+    padding: 8,
     backgroundColor: '#fff',
     borderRadius: 4,
   },
   metricText: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#666',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   runTypeContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    gap: 12,
-    marginVertical: 8,
+    gap: 8,
   },
   runTypeText: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#444',
   },
   dismissalDetails: {
-    padding: 12,
+    padding: 8,
     backgroundColor: '#fff',
     borderRadius: 4,
-    gap: 6,
-    marginTop: 8,
+    gap: 4,
   },
   notesContainer: {
     marginTop: 12,
@@ -1199,6 +1194,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
+  },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
   },
   subSectionTitle: {
     fontSize: 16,

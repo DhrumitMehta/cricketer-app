@@ -272,11 +272,6 @@ export default function Matches() {
     return remainingBalls === 0 ? fullOvers.toString() : `${fullOvers}.${remainingBalls}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-  };
-
   const renderMatchListItem = (match: Match) => (
     <TouchableOpacity
       key={match.id}
@@ -287,7 +282,7 @@ export default function Matches() {
       onPress={() => setSelectedMatch(match)}
     >
       <Text style={styles.matchListDate}>
-        {formatDate(match.date)}
+        {new Date(match.date).toLocaleDateString()}
       </Text>
       <Text style={styles.matchListOpponent} numberOfLines={1}>
         vs {match.opponent}
@@ -302,7 +297,7 @@ export default function Matches() {
     <Card style={styles.detailCard}>
       <Card.Content>
         <View style={styles.matchHeader}>
-          <Text style={styles.date}>{formatDate(match.date)}</Text>
+          <Text style={styles.date}>{new Date(match.date).toLocaleDateString()}</Text>
           <View style={styles.matchActions}>
             <IconButton
               icon="pencil"
@@ -1199,6 +1194,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
+  },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
   },
   subSectionTitle: {
     fontSize: 16,

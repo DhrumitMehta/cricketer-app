@@ -272,11 +272,6 @@ export default function Matches() {
     return remainingBalls === 0 ? fullOvers.toString() : `${fullOvers}.${remainingBalls}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-  };
-
   const renderMatchListItem = (match: Match) => (
     <TouchableOpacity
       key={match.id}
@@ -287,7 +282,7 @@ export default function Matches() {
       onPress={() => setSelectedMatch(match)}
     >
       <Text style={styles.matchListDate}>
-        {formatDate(match.date)}
+        {new Date(match.date).toLocaleDateString()}
       </Text>
       <Text style={styles.matchListOpponent} numberOfLines={1}>
         vs {match.opponent}
@@ -302,7 +297,7 @@ export default function Matches() {
     <Card style={styles.detailCard}>
       <Card.Content>
         <View style={styles.matchHeader}>
-          <Text style={styles.date}>{formatDate(match.date)}</Text>
+          <Text style={styles.date}>{new Date(match.date).toLocaleDateString()}</Text>
           <View style={styles.matchActions}>
             <IconButton
               icon="pencil"
@@ -323,62 +318,67 @@ export default function Matches() {
         <Text style={styles.result}>{match.result}</Text>
         
         <View style={styles.statsContainer}>
-          {/* Batting Stats */}
           <View style={styles.statSection}>
             <Text style={styles.statTitle}>Batting</Text>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>{match.batting.runs} ({match.batting.balls})</Text>
-              <View style={styles.runTypeContainer}>
-                <Text style={styles.runTypeText}>1s: {match.batting.singles}</Text>
-                <Text style={styles.runTypeText}>2s: {match.batting.doubles}</Text>
-                <Text style={styles.runTypeText}>3s: {match.batting.triples}</Text>
+            <Text>Runs: {match.batting.runs} ({match.batting.balls})</Text>
+            <View style={styles.runTypeContainer}>
+              <Text style={styles.runTypeText}>1s: {match.batting.singles}</Text>
+              <Text style={styles.runTypeText}>2s: {match.batting.doubles}</Text>
+              <Text style={styles.runTypeText}>3s: {match.batting.triples}</Text>
+            </View>
+            <Text>4s: {match.batting.fours} | 6s: {match.batting.sixes}</Text>
+            {match.batting.not_out ? (
+              <Text>Not Out</Text>
+            ) : (
+              <View style={styles.dismissalDetails}>
+                <Text>Out: {match.batting.how_out}</Text>
+                {match.batting.shot_out && <Text>Shot: {match.batting.shot_out}</Text>}
+                {match.batting.error_type && <Text>Error: {match.batting.error_type}</Text>}
+                {match.batting.bowler_type && <Text>Bowler: {match.batting.bowler_type}</Text>}
               </View>
-              <Text style={styles.statValue}>4s: {match.batting.fours} | 6s: {match.batting.sixes}</Text>
-              {match.batting.not_out ? (
-                <Text style={styles.statValue}>Not Out</Text>
-              ) : (
-                <View style={styles.dismissalDetails}>
-                  <Text style={styles.statValue}>Out: {match.batting.how_out}</Text>
-                  {match.batting.shot_out && <Text style={styles.statValue}>Shot: {match.batting.shot_out}</Text>}
-                  {match.batting.error_type && <Text style={styles.statValue}>Error: {match.batting.error_type}</Text>}
-                  {match.batting.bowler_type && <Text style={styles.statValue}>Bowler: {match.batting.bowler_type}</Text>}
-                </View>
-              )}
-              <View style={styles.metricsContainer}>
-                <Text style={styles.metricText}>Dot %: {match.dot_percentage}%</Text>
-                <Text style={styles.metricText}>SR: {match.strike_rate}</Text>
-                <Text style={styles.metricText}>Boundary %: {match.boundary_percentage}%</Text>
-                <Text style={styles.metricText}>Balls/Boundary: {match.balls_per_boundary || '-'}</Text>
-              </View>
+            )}
+            <View style={styles.metricsContainer}>
+              <Text style={styles.metricText}>
+                Dot %: {match.dot_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Strike Rate: {match.strike_rate}
+              </Text>
+              <Text style={styles.metricText}>
+                Boundary %: {match.boundary_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Balls/Boundary: {match.balls_per_boundary || '-'}
+              </Text>
             </View>
           </View>
-
-          {/* Bowling Stats */}
+          
           <View style={styles.statSection}>
             <Text style={styles.statTitle}>Bowling</Text>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>
-                {ballsToOvers(match.bowling.balls)}-{match.bowling.maidens}-{match.bowling.runs}-{match.bowling.wickets}
+            <Text style={styles.bowlingStats}>
+              {ballsToOvers(match.bowling.balls)}-{match.bowling.maidens}-{match.bowling.runs}-{match.bowling.wickets}
+            </Text>
+            <Text>Wides: {match.bowling_wides} | No Balls: {match.bowling_noballs}</Text>
+            <View style={styles.metricsContainer}>
+              <Text style={styles.metricText}>
+                Economy: {match.bowling_economy}
               </Text>
-              <Text style={styles.statValue}>Wides: {match.bowling_wides} | No Balls: {match.bowling_noballs}</Text>
-              <View style={styles.metricsContainer}>
-                <Text style={styles.metricText}>Economy: {match.bowling_economy}</Text>
-                <Text style={styles.metricText}>Dot %: {match.bowling_dot_percentage}%</Text>
-                <Text style={styles.metricText}>Balls/Boundary: {match.bowling_balls_per_boundary || '-'}</Text>
-              </View>
+              <Text style={styles.metricText}>
+                Dot %: {match.bowling_dot_percentage}%
+              </Text>
+              <Text style={styles.metricText}>
+                Balls/Boundary: {match.bowling_balls_per_boundary || '-'}
+              </Text>
             </View>
           </View>
 
-          {/* Fielding Stats */}
           <View style={styles.statSection}>
             <Text style={styles.statTitle}>Fielding</Text>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>Infield catches: {match.fielding.infield_catches}</Text>
-              <Text style={styles.statValue}>Bdry catches: {match.fielding.boundary_catches}</Text>
-              <Text style={styles.statValue}>Direct RO: {match.fielding.direct_runouts}</Text>
-              <Text style={styles.statValue}>Indirect RO: {match.fielding.indirect_runouts}</Text>
-              <Text style={styles.statValue}>Drops: {match.fielding.drops}</Text>
-            </View>
+            <Text style={styles.fieldingStat}>Infield catches: {match.fielding.infield_catches}</Text>
+            <Text style={styles.fieldingStat}>Bdry catches: {match.fielding.boundary_catches}</Text>
+            <Text style={styles.fieldingStat}>Direct RO: {match.fielding.direct_runouts}</Text>
+            <Text style={styles.fieldingStat}>Indirect RO: {match.fielding.indirect_runouts}</Text>
+            <Text style={styles.fieldingStat}>Drops: {match.fielding.drops}</Text>
           </View>
         </View>
 
@@ -938,38 +938,128 @@ export default function Matches() {
           onPress={() => navigation.navigate('PlayerProfile')}
         />
       </View>
-      
-      <View style={styles.contentContainer}>
-        {/* Center Detail View */}
-        <View style={styles.detailContainer}>
-          {selectedMatch ? (
-            <ScrollView 
-              style={styles.detailScroll}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={['#2196F3']}
-                  tintColor="#2196F3"
-                />
-              }
-            >
-              {renderMatchDetail(selectedMatch)}
-            </ScrollView>
-          ) : (
-            <View style={styles.noSelectionContainer}>
-              <Text style={styles.noSelectionText}>Select a match from the list</Text>
-            </View>
-          )}
-        </View>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2196F3']}
+            tintColor="#2196F3"
+          />
+        }
+      >
+        {matches.map((match) => (
+          <Card key={match.id} style={styles.card}>
+            <Card.Content>
+              <View style={styles.matchHeader}>
+                <Text style={styles.date}>{new Date(match.date).toLocaleDateString()}</Text>
+                <View style={styles.matchActions}>
+                  <IconButton
+                    icon="pencil"
+                    size={20}
+                    onPress={() => handleEditMatch(match)}
+                  />
+                  <IconButton
+                    icon="delete"
+                    size={20}
+                    onPress={() => handleDeleteMatch(match.id)}
+                  />
+                </View>
+              </View>
+              <Text style={styles.matchDetails}>
+                {match.match_format === 'Other' ? match.other_format : match.match_format} at {match.venue} vs <Text style={styles.opponentName}>{match.opponent}</Text>
+                {match.competition && ` - ${match.competition}`}
+              </Text>
+              <Text style={styles.result}>{match.result}</Text>
+              
+              <View style={styles.statsContainer}>
+                <View style={styles.statSection}>
+                  <Text style={styles.statTitle}>Batting</Text>
+                  <Text>Runs: {match.batting.runs} ({match.batting.balls})</Text>
+                  <View style={styles.runTypeContainer}>
+                    <Text style={styles.runTypeText}>1s: {match.batting.singles}</Text>
+                    <Text style={styles.runTypeText}>2s: {match.batting.doubles}</Text>
+                    <Text style={styles.runTypeText}>3s: {match.batting.triples}</Text>
+                  </View>
+                  <Text>4s: {match.batting.fours} | 6s: {match.batting.sixes}</Text>
+                  {match.batting.not_out ? (
+                    <Text>Not Out</Text>
+                  ) : (
+                    <View style={styles.dismissalDetails}>
+                      <Text>Out: {match.batting.how_out}</Text>
+                      {match.batting.shot_out && <Text>Shot: {match.batting.shot_out}</Text>}
+                      {match.batting.error_type && <Text>Error: {match.batting.error_type}</Text>}
+                      {match.batting.bowler_type && <Text>Bowler: {match.batting.bowler_type}</Text>}
+                    </View>
+                  )}
+                  <View style={styles.metricsContainer}>
+                    <Text style={styles.metricText}>
+                      Dot %: {match.dot_percentage}%
+                    </Text>
+                    <Text style={styles.metricText}>
+                      Strike Rate: {match.strike_rate}
+                    </Text>
+                    <Text style={styles.metricText}>
+                      Boundary %: {match.boundary_percentage}%
+                    </Text>
+                    <Text style={styles.metricText}>
+                      Balls/Boundary: {match.balls_per_boundary || '-'}
+                    </Text>
+                  </View>
+                </View>
+                
+                <View style={styles.statSection}>
+                  <Text style={styles.statTitle}>Bowling</Text>
+                  <Text style={styles.bowlingStats}>
+                    {ballsToOvers(match.bowling.balls)}-{match.bowling.maidens}-{match.bowling.runs}-{match.bowling.wickets}
+                  </Text>
+                  <Text>Wides: {match.bowling_wides} | No Balls: {match.bowling_noballs}</Text>
+                  <View style={styles.metricsContainer}>
+                    <Text style={styles.metricText}>
+                      Economy: {match.bowling_economy}
+                    </Text>
+                    <Text style={styles.metricText}>
+                      Dot %: {match.bowling_dot_percentage}%
+                    </Text>
+                    <Text style={styles.metricText}>
+                      Balls/Boundary: {match.bowling_balls_per_boundary || '-'}
+                    </Text>
+                  </View>
+                </View>
 
-        {/* Right Side List */}
-        <View style={styles.listContainer}>
-          <ScrollView style={styles.matchList}>
-            {matches.map(renderMatchListItem)}
-          </ScrollView>
-        </View>
-      </View>
+                <View style={styles.statSection}>
+                  <Text style={styles.statTitle}>Fielding</Text>
+                  <Text style={styles.fieldingStat}>Infield catches: {match.fielding.infield_catches}</Text>
+                  <Text style={styles.fieldingStat}>Bdry catches: {match.fielding.boundary_catches}</Text>
+                  <Text style={styles.fieldingStat}>Direct RO: {match.fielding.direct_runouts}</Text>
+                  <Text style={styles.fieldingStat}>Indirect RO: {match.fielding.indirect_runouts}</Text>
+                  <Text style={styles.fieldingStat}>Drops: {match.fielding.drops}</Text>
+                </View>
+              </View>
+
+              {match.fielding.player_of_match && (
+                <View style={styles.playerOfMatchContainer}>
+                  <Text style={styles.playerOfMatchText}>Awarded Player of the Match</Text>
+                </View>
+              )}
+
+              {match.batting_notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Batting Notes</Text>
+                  <Text>{match.batting_notes}</Text>
+                </View>
+              )}
+              {match.bowling_notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Bowling Notes</Text>
+                  <Text>{match.bowling_notes}</Text>
+                </View>
+              )}
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
 
       {renderAddMatchForm()}
 
@@ -990,63 +1080,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  contentContainer: {
+  scrollView: {
     flex: 1,
-    flexDirection: 'row',
-  },
-  detailContainer: {
-    width: '70%',
-    paddingHorizontal: 24,
-    backgroundColor: 'white',
-  },
-  detailScroll: {
-    flex: 1,
-  },
-  listContainer: {
-    width: '30%',
-    backgroundColor: '#f8f8f8',
-    borderLeftWidth: 1,
-    borderLeftColor: '#e0e0e0',
-  },
-  matchList: {
-    flex: 1,
-  },
-  matchListItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  selectedMatchListItem: {
-    backgroundColor: '#e3f2fd',
-  },
-  matchListDate: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
-  },
-  matchListOpponent: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  matchListFormat: {
-    fontSize: 11,
-    color: '#888',
-  },
-  noSelectionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noSelectionText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  detailCard: {
-    marginVertical: 16,
-    elevation: 2,
-    marginHorizontal: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -1054,74 +1089,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  card: {
+    margin: 8,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  statsContainer: {
-    flexDirection: 'column',
-    gap: 16,
-    marginTop: 16,
-  },
-  statSection: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 16,
-  },
-  statTitle: {
+  date: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
   },
-  statContent: {
-    gap: 8,
+  opponent: {
+    fontSize: 18,
+    marginVertical: 4,
   },
-  statValue: {
+  venue: {
     fontSize: 14,
-    color: '#444',
-  },
-  metricsContainer: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-  },
-  metricText: {
-    fontSize: 13,
     color: '#666',
-    marginBottom: 4,
   },
-  runTypeContainer: {
+  result: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 12,
-    marginVertical: 8,
-  },
-  runTypeText: {
-    fontSize: 13,
-    color: '#444',
-  },
-  dismissalDetails: {
-    padding: 12,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    gap: 6,
+    justifyContent: 'space-between',
     marginTop: 8,
   },
+  statSection: {
+    flex: 1,
+  },
+  statTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
   notesContainer: {
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 8,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
@@ -1179,6 +1182,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  metricsContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
+  metricText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
+  },
+  bowlingStats: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  fieldingStat: {
+    fontSize: 12,
+    marginBottom: 2,
+    marginLeft: 10,
+  },
   formatContainer: {
     marginBottom: 16,
   },
@@ -1200,6 +1224,40 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  competition: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    fontStyle: 'italic',
+  },
+  matchDetails: {
+    fontSize: 16,
+    marginVertical: 4,
+    color: '#333',
+  },
+  opponentName: {
+    fontWeight: 'bold',
+  },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
   subSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -1220,22 +1278,14 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 100,
   },
-  date: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  matchDetails: {
-    fontSize: 15,
+  runTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     marginVertical: 4,
-    color: '#333',
+    gap: 8,
   },
-  opponentName: {
-    fontWeight: '600',
-  },
-  result: {
+  runTypeText: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    color: '#333',
   },
 }); 

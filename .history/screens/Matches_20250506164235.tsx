@@ -1200,6 +1200,12 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  dismissalDetails: {
+    marginTop: 4,
+    padding: 4,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+  },
   subSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
