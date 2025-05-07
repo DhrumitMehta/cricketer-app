@@ -10,9 +10,12 @@ import SignUp from '../screens/SignUp';
 import Matches from '../screens/Matches';
 import BottomTabNavigator from './BottomTabNavigator';
 import { supabase } from '../lib/supabase';
+<<<<<<< HEAD
 import Stats from '../screens/Stats';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+=======
+>>>>>>> aab2dc33b6c23749fa2ab93740ab8d1e6153f6cc
 
 export type RootStackParamList = {
   Login: undefined;
@@ -20,13 +23,19 @@ export type RootStackParamList = {
   Main: undefined;
   AddTrainingSession: { session?: any };
   PlayerProfile: undefined;
+<<<<<<< HEAD
   Stats: undefined;
+=======
+>>>>>>> aab2dc33b6c23749fa2ab93740ab8d1e6153f6cc
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+<<<<<<< HEAD
 const Tab = createBottomTabNavigator();
 
+=======
+>>>>>>> aab2dc33b6c23749fa2ab93740ab8d1e6153f6cc
 export default function AppNavigator() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,6 +92,7 @@ export default function AppNavigator() {
               component={PlayerProfile}
               options={{ title: 'Player Profile' }}
             />
+<<<<<<< HEAD
             <Stack.Screen 
               name="Stats" 
               component={Stats}
@@ -90,11 +100,14 @@ export default function AppNavigator() {
                 title: 'Statistics',
               }}
             />
+=======
+>>>>>>> aab2dc33b6c23749fa2ab93740ab8d1e6153f6cc
           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
+<<<<<<< HEAD
 }
 
 function TabNavigator() {
@@ -162,4 +175,6 @@ function TabNavigator() {
       />
     </Tab.Navigator>
   );
+=======
+>>>>>>> aab2dc33b6c23749fa2ab93740ab8d1e6153f6cc
 } 
